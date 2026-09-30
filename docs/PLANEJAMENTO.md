@@ -1,42 +1,42 @@
-# Planejamento — Projeto BCB Financeiro
+# Planning | BCB Financial Project
 
-## Fase 1: Coleta de Dados
-- [ ] Coletar dados do IF.data (demonstrações financeiras trimestrais)
-- [ ] Configurar scripts para API SGS (séries temporais: Selic, IPCA, crédito, inadimplência)
-- [ ] Coletar taxas de juros por instituição via API Olinda/BCB
-- [ ] Baixar ESTBAN (estatística bancária por município)
-- [ ] Coletar ranking de reclamações
+## Phase 1: Data collection
+- [ ] Collect IF.data (quarterly financial statements)
+- [ ] Set up scripts for the SGS API (time series: Selic, IPCA, credit, delinquency)
+- [ ] Collect interest rates by institution via the Olinda/BCB API
+- [ ] Download ESTBAN (banking statistics by municipality)
+- [ ] Collect the complaints ranking
 
-## Fase 2: Tratamento
-- [ ] Padronizar nomes de instituições entre as fontes
-- [ ] Classificar instituições por segmento (grandes, médios, digitais, cooperativas, públicos)
-- [ ] Tratar dados do ESTBAN (mapear verbas contábeis)
-- [ ] Unificar períodos e granularidade temporal
-- [ ] Criar tabela-mestre de instituições com metadados
+## Phase 2: Processing
+- [ ] Standardise institution names across sources
+- [ ] Classify institutions by segment (large, mid-sized, digital, cooperatives, public)
+- [ ] Process ESTBAN data (map accounting items)
+- [ ] Unify periods and time granularity
+- [ ] Build a master table of institutions with metadata
 
-## Fase 3: Análise
-- [ ] Calcular indicadores financeiros (ROE, ROA, Basileia, margem)
-- [ ] Análise de market share e concentração (HHI)
-- [ ] Comparativo bancos vs cooperativas (taxas, inadimplência, crescimento)
-- [ ] Evolução temporal do crédito por segmento e modalidade
-- [ ] Análise geográfica de crédito/depósitos (ESTBAN)
-- [ ] Correlação reclamações vs crescimento
+## Phase 3: Analysis
+- [ ] Calculate financial indicators (ROE, ROA, Basel ratio, margin)
+- [ ] Market share and concentration analysis (HHI)
+- [ ] Banks vs cooperatives comparison (rates, delinquency, growth)
+- [ ] Credit trends by segment and loan type
+- [ ] Geographic analysis of credit/deposits (ESTBAN)
+- [ ] Correlation between complaints and growth
 
-## Fase 4: Visualização
-- [ ] Gráficos de ranking (barras horizontais) — rentabilidade por instituição
-- [ ] Séries temporais — evolução do crédito e market share
-- [ ] Mapa coroplético — crédito per capita por estado/município
-- [ ] Heatmap — taxas de juros por instituição x modalidade
-- [ ] Scatter — ROE vs tamanho da carteira
+## Phase 4: Visualisation
+- [ ] Ranking charts (horizontal bars): profitability by institution
+- [ ] Time series: credit and market share trends
+- [ ] Choropleth map: credit per capita by state/municipality
+- [ ] Heatmap: interest rates by institution x loan type
+- [ ] Scatter: ROE vs loan book size
 
-## Fase 5: Dashboard
-- [ ] Montar dashboard interativo (Streamlit)
-- [ ] Filtros por segmento, período, modalidade
-- [ ] Publicar/documentar
+## Phase 5: Dashboard
+- [ ] Build an interactive dashboard (Streamlit)
+- [ ] Filters by segment, period and loan type
+- [ ] Publish and document
 
-## Ordem de Execução Sugerida
+## Suggested order
 
-1. Começar pela **API SGS** (mais fácil, JSON direto)
-2. Depois **taxas de juros por instituição** (API Olinda)
-3. Depois **IF.data** (pode exigir scraping)
-4. **ESTBAN** e **reclamações** por último (complementares)
+1. Start with the **SGS API** (easiest, straight JSON)
+2. Then **interest rates by institution** (Olinda API)
+3. Then **IF.data** (may need scraping)
+4. **ESTBAN** and **complaints** last (complementary)

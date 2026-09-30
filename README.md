@@ -1,49 +1,49 @@
-# BCB Financeiro
+# BCB Financial
 
-Dashboard interativo de análise do **Sistema Financeiro Nacional** com dados 100% públicos do Banco Central do Brasil.
+Interactive dashboard analysing Brazil's **National Financial System (SFN)** with 100% public data from the Central Bank of Brazil (BCB).
 
-Analisa rentabilidade, concentração de mercado, taxas de juros, crédito e distribuição geográfica de **bancos, cooperativas e instituições digitais**.
+It analyses profitability, market concentration, interest rates, credit and the geographic distribution of **banks, credit cooperatives and digital institutions**.
 
-**[Acessar o Dashboard](https://fexndev.github.io/bcb-financeiro/)**
+**[Open the dashboard](https://fexndev.github.io/bcb-financeiro/)**
 
 ---
 
-## Funcionalidades
+## Features
 
-- **Filtros dinâmicos** — todos os gráficos, KPIs e tabelas reagem à seleção de segmento e instituição (comportamento Power BI)
-- **KPIs contextuais** — cards mudam entre dados do SFN, do segmento ou da instituição selecionada, com trend arrows (vs trimestre anterior)
-- **View toggle** — alternância rápida entre Todos / Bancos / Cooperativas
-- **Mapa interativo** — choropleth D3.js do Brasil com tooltip rico (crédito, % SFN, per capita) e tabela paginada com filtro por região
-- **8 seções de análise** — Resumo, Rentabilidade, Crédito, Taxas, Concentração, Bancos vs Coops, Mapa, Reclamações
-- **Dark/Light mode** — com persistência em localStorage
-- **Atualização automática** — GitHub Actions coleta dados do BCB mensalmente
+- **Dynamic filters**: every chart, KPI and table reacts to the selected segment and institution (Power BI-style behaviour)
+- **Contextual KPIs**: cards switch between financial system, segment or institution data, with trend arrows (vs previous quarter)
+- **View toggle**: quick switch between All / Banks / Co-ops
+- **Interactive map**: D3.js choropleth of Brazil with a rich tooltip (credit, % of the system, per capita) and a paginated table with a region filter
+- **8 analysis sections**: Summary, Profitability, Credit, Rates, Concentration, Banks vs Co-ops, Map, Complaints
+- **Dark/light mode** persisted in localStorage
+- **Automatic updates**: GitHub Actions collects BCB data every month
 
-## Fontes de dados
+## Data sources
 
-| Fonte | Dados |
+| Source | Data |
 |-------|-------|
-| [IF.data](https://www3.bcb.gov.br/ifdata/) | Ativo, PL, lucro, crédito, Basileia — por instituição e trimestre (12 trimestres) |
-| [SGS](https://dadosabertos.bcb.gov.br/) | Crédito total, inadimplência, spread — séries mensais |
-| [Olinda](https://olinda.bcb.gov.br/) | Taxas de juros por instituição e modalidade |
-| [ESTBAN](https://www4.bcb.gov.br/fis/cosif/estban.asp) | Estatísticas bancárias por UF |
-| BCB Ranking | Índice de reclamações por instituição |
+| [IF.data](https://www3.bcb.gov.br/ifdata/) | Assets, equity, net income, credit, Basel ratio, by institution and quarter (12 quarters) |
+| [SGS](https://dadosabertos.bcb.gov.br/) | Total credit, delinquency, spread (monthly series) |
+| [Olinda](https://olinda.bcb.gov.br/) | Interest rates by institution and loan type |
+| [ESTBAN](https://www4.bcb.gov.br/fis/cosif/estban.asp) | Banking statistics by state |
+| BCB Ranking | Complaints index by institution |
 
-## Segmentação
+## Segmentation
 
-| Segmento | Instituições |
+| Segment | Institutions |
 |----------|-------------|
-| **Grandes Bancos** | Itaú, Bradesco, Santander, BB, Caixa, Nubank |
-| **Cooperativas** | Sicoob (280), Sicredi (110), Cresol (63), Unicred (23), Ailos |
-| **Outros** | BTG, Safra, Pan, BMG, Inter, C6 e demais |
+| **Large banks** | Itaú, Bradesco, Santander, BB, Caixa, Nubank |
+| **Cooperatives** | Sicoob (280), Sicredi (110), Cresol (63), Unicred (23), Ailos |
+| **Others** | BTG, Safra, Pan, BMG, Inter, C6 and others |
 
 ## Stack
 
-- **Coleta:** Python 3 + requests
-- **Frontend:** HTML + CSS + JS vanilla + Chart.js + D3.js
+- **Collection:** Python 3 + requests
+- **Frontend:** HTML + CSS + vanilla JS + Chart.js + D3.js
 - **Deploy:** GitHub Pages
-- **Automação:** GitHub Actions (dia 5 de cada mês)
+- **Automation:** GitHub Actions (day 5 of each month)
 
-## Executar localmente
+## Run locally
 
 ```bash
 cd scripts
@@ -52,19 +52,19 @@ python fetch_credito.py && python fetch_taxas.py && python fetch_ifdata.py && py
 cd .. && python -m http.server 8000
 ```
 
-## Estrutura
+## Structure
 
 ```
 bcb-financeiro/
 ├── index.html, app.js, styles.css   # Frontend
-├── data/                             # JSONs (gerados pelos scripts)
-├── scripts/                          # Coleta de dados (Python)
-│   ├── utils.py                      # Classificação e utilidades
-│   ├── fetch_ifdata.py               # Demonstrações financeiras
-│   ├── fetch_credito.py              # Séries SGS
-│   ├── fetch_taxas.py                # Taxas de juros
-│   ├── fetch_estban.py               # Dados geográficos por UF
-│   └── fetch_reclamacoes.py          # Ranking de reclamações
-├── docs/                             # Contexto e planejamento
+├── data/                             # JSON files (generated by the scripts)
+├── scripts/                          # Data collection (Python)
+│   ├── utils.py                      # Classification and utilities
+│   ├── fetch_ifdata.py               # Financial statements
+│   ├── fetch_credito.py              # SGS series
+│   ├── fetch_taxas.py                # Interest rates
+│   ├── fetch_estban.py               # Geographic data by state
+│   └── fetch_reclamacoes.py          # Complaints ranking
+├── docs/                             # Context and planning
 └── .github/workflows/                # CI/CD
 ```

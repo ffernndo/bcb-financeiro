@@ -1,4 +1,4 @@
-"""Coleta séries de crédito, inadimplência e spread do SFN via API SGS/BCB."""
+"""Collects credit, delinquency and spread series for the financial system via the SGS/BCB API."""
 
 from utils import (
     fetch_sgs, parse_month, calc_variacao_yoy, save_json, now_iso,
@@ -7,7 +7,7 @@ from utils import (
 
 
 def coletar_serie(nome, codigo):
-    """Coleta e formata uma série SGS em valores mensais."""
+    """Collects an SGS series and formats it as monthly values."""
     raw = fetch_sgs(codigo)
     monthly = []
     for item in raw:
@@ -19,7 +19,7 @@ def coletar_serie(nome, codigo):
 
 
 def main():
-    print("── Coletando séries de crédito do SFN ──")
+    print("── Collecting financial system credit series ──")
 
     resultado = {
         "last_updated": now_iso(),
@@ -38,9 +38,9 @@ def main():
                 "variacao_yoy": yoy,
                 "ultimo": monthly[-1] if monthly else None,
             }
-            print(f"    {len(monthly)} registros")
+            print(f"    {len(monthly)} records")
         except Exception as e:
-            print(f"    ERRO: {e}")
+            print(f"    ERROR: {e}")
             resultado["series"][nome] = {"codigo_sgs": codigo, "erro": str(e)}
 
     # resumo atual
@@ -57,7 +57,7 @@ def main():
             resultado["resumo"][key] = series[key]["ultimo"]
 
     save_json(resultado, "credito.json")
-    print("── Concluído ──")
+    print("── Done ──")
 
 
 if __name__ == "__main__":

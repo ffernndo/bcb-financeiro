@@ -1,15 +1,15 @@
-"""Coleta ranking de reclamações contra instituições financeiras do BCB."""
+"""Collects the BCB ranking of complaints against financial institutions."""
 
 import requests
 from utils import save_json, now_iso, classificar_instituicao
 
-# API Olinda para ranking de reclamações
+# Olinda API for the complaints ranking
 RANKING_URL = (
     "https://olinda.bcb.gov.br/olinda/servico/Informes_Ranking/versao/v1/odata/"
     "RankingReclamacoes"
 )
 
-# Endpoint alternativo — dados abertos
+# Alternative endpoint: open data
 DADOS_ABERTOS_URL = (
     "https://olinda.bcb.gov.br/olinda/servico/SRO/versao/v1/odata/"
 )
@@ -24,7 +24,7 @@ def fetch_ranking_olinda():
 
 
 def fetch_ranking_sro():
-    """Busca dados do SRO (Sistema de Registro de Demandas)."""
+    """Fetches data from the SRO (complaints registration system)."""
     # Tentar diferentes endpoints
     endpoints = [
         "RankingReclamacao",
@@ -40,7 +40,7 @@ def fetch_ranking_sro():
                 data = resp.json()
                 records = data.get("value", [])
                 if records:
-                    print(f"    Endpoint {ep}: {len(records)} registros")
+                    print(f"    Endpoint {ep}: {len(records)} records")
                     return records
         except Exception:
             continue
@@ -48,14 +48,14 @@ def fetch_ranking_sro():
 
 
 def fetch_ranking_sgp():
-    """Busca ranking via serviço BCB Ranking."""
+    """Fetches the ranking via the BCB Ranking service."""
     url = "https://olinda.bcb.gov.br/olinda/servico/Informes_Ranking/versao/v1/odata/"
     try:
         resp = requests.get(url, params={"$format": "json"}, timeout=30)
         if resp.ok:
             data = resp.json()
             resources = data.get("value", [])
-            print(f"    Recursos disponíveis: {[r.get('name') for r in resources]}")
+            print(f"    Available resources: {[r.get('name') for r in resources]}")
             for r in resources:
                 name = r.get("name", "")
                 if "ranking" in name.lower() or "reclamacao" in name.lower():
@@ -72,12 +72,12 @@ def fetch_ranking_sgp():
 
 
 def gerar_dados_fallback():
-    """Gera dados de reclamações a partir de dados públicos conhecidos.
-    Fonte: Ranking de Reclamações do BCB (dados públicos trimestrais).
-    Quando a API não está disponível, usamos os dados mais recentes publicados.
+    """Builds complaint data from known public data.
+    Source: BCB Complaints Ranking (quarterly public data).
+    When the API is unavailable, we use the latest published data.
     """
-    # Dados do ranking mais recente (4T 2024) — fonte pública BCB
-    # Índice = reclamações reguladas procedentes por milhão de clientes
+    # Latest ranking data (Q4 2024), public BCB source
+    # Index = upheld regulated complaints per million customers
     return [
         {"instituicao": "Banco Pan", "indice": 52.84, "reclamacoes": 1847, "clientes_milhoes": 34.9, "segmento": "S2"},
         {"instituicao": "BMG", "indice": 48.21, "reclamacoes": 563, "clientes_milhoes": 11.7, "segmento": "S2"},
@@ -95,23 +95,23 @@ def gerar_dados_fallback():
 
 
 def gerar_tipos_reclamacao():
-    """Distribuição por tipo/assunto de reclamação (dados públicos BCB).
-    Fonte: Relatório de Gestão de Reclamações BCB (publicação anual).
+    """Distribution by complaint type/subject (public BCB data).
+    Source: BCB Complaints Management Report (annual publication).
     """
     return [
-        {"tipo": "Operações de crédito", "percentual": 28.4, "reclamacoes": 4620},
-        {"tipo": "Cartão de crédito/débito", "percentual": 18.7, "reclamacoes": 3042},
-        {"tipo": "Conta corrente", "percentual": 15.2, "reclamacoes": 2472},
-        {"tipo": "Cobrança irregular", "percentual": 12.8, "reclamacoes": 2082},
-        {"tipo": "Atendimento / SAC", "percentual": 9.3, "reclamacoes": 1512},
-        {"tipo": "Oferta e contratação", "percentual": 7.1, "reclamacoes": 1155},
-        {"tipo": "Portabilidade", "percentual": 4.6, "reclamacoes": 748},
-        {"tipo": "Outros", "percentual": 3.9, "reclamacoes": 634},
+        {"tipo": "Credit operations", "percentual": 28.4, "reclamacoes": 4620},
+        {"tipo": "Credit/debit card", "percentual": 18.7, "reclamacoes": 3042},
+        {"tipo": "Current account", "percentual": 15.2, "reclamacoes": 2472},
+        {"tipo": "Irregular charges", "percentual": 12.8, "reclamacoes": 2082},
+        {"tipo": "Customer service", "percentual": 9.3, "reclamacoes": 1512},
+        {"tipo": "Sales and contracting", "percentual": 7.1, "reclamacoes": 1155},
+        {"tipo": "Portability", "percentual": 4.6, "reclamacoes": 748},
+        {"tipo": "Others", "percentual": 3.9, "reclamacoes": 634},
     ]
 
 
 def main():
-    print("── Coletando ranking de reclamações ──")
+    print("── Collecting complaints ranking ──")
 
     # Tentar APIs
     print("  → Tentando API Olinda (Informes_Ranking)...")
@@ -126,8 +126,8 @@ def main():
         records = fetch_ranking_sgp()
 
     if records:
-        print(f"    {len(records)} registros da API")
-        # Processar records da API
+        print(f"    {len(records)} records from the API")
+        # Process API records
         ranking = []
         for r in records:
             ranking.append({
@@ -139,15 +139,15 @@ def main():
                     r.get("InstituicaoFinanceira", r.get("instituicao", ""))
                 ),
             })
-        source = "BCB/Olinda - Ranking de Reclamações"
+        source = "BCB/Olinda - Complaints Ranking"
     else:
-        print("  → APIs indisponíveis, usando dados públicos de referência...")
+        print("  → APIs unavailable, using public reference data...")
         ranking = gerar_dados_fallback()
-        source = "BCB - Ranking de Reclamações (dados de referência 4T/2024)"
+        source = "BCB - Complaints Ranking (reference data Q4/2024)"
 
     ranking.sort(key=lambda x: x.get("indice", 0), reverse=True)
 
-    # Média por segmento
+    # Average by segment
     por_seg = {}
     for r in ranking:
         seg = r["segmento"]
@@ -164,8 +164,8 @@ def main():
     }
 
     save_json(resultado, "reclamacoes.json")
-    print(f"  {len(ranking)} instituições no ranking")
-    print("── Concluído ──")
+    print(f"  {len(ranking)} institutions in the ranking")
+    print("── Done ──")
 
 
 if __name__ == "__main__":

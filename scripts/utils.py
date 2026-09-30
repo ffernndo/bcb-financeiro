@@ -1,4 +1,4 @@
-"""Funções utilitárias compartilhadas para coleta de dados do BCB."""
+"""Shared utility functions for collecting BCB data."""
 
 import json
 import requests
@@ -9,8 +9,8 @@ DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 SGS_BASE = "https://api.bcb.gov.br/dados/serie/bcdata.sgs.{serie}/dados"
 OLINDA_BASE = "https://olinda.bcb.gov.br/olinda/servico/{servico}/versao/{versao}/odata/{recurso}"
 
-# ── Instituições de referência ─────────────────────────────────────────────
-# Segmentos simplificados: grande, outro_banco, cooperativa
+# ── Reference institutions ─────────────────────────────────────────────
+# Simplified segments: grande (large), outro_banco (other bank), cooperativa (co-op)
 
 INSTITUICOES = {
     "ITAU":        {"cnpj": "60701190", "nome": "Itaú Unibanco",       "segmento": "grande"},
@@ -43,7 +43,7 @@ SEGMENTO_LABELS = {
     "outro":        "Outros",
 }
 
-# ── Séries SGS ──────────────────────────────────────────────────────────────
+# ── SGS series ──────────────────────────────────────────────────────────────
 
 SERIES_CREDITO = {
     "credito_total":     20539,
@@ -57,10 +57,10 @@ SERIES_CREDITO = {
 }
 
 
-# ── Funções de coleta ───────────────────────────────────────────────────────
+# ── Collection functions ───────────────────────────────────────────────────────
 
 def fetch_sgs(serie, data_inicial="01/01/2020", data_final=None):
-    """Busca série temporal no SGS do BCB."""
+    """Fetches a time series from the BCB SGS."""
     if data_final is None:
         data_final = datetime.now().strftime("%d/%m/%Y")
     url = SGS_BASE.format(serie=serie)
@@ -74,7 +74,7 @@ def fetch_sgs(serie, data_inicial="01/01/2020", data_final=None):
 
 
 def fetch_olinda(servico, versao, recurso, params=None):
-    """Busca dados na API Olinda do BCB."""
+    """Fetches data from the BCB Olinda API."""
     url = OLINDA_BASE.format(servico=servico, versao=versao, recurso=recurso)
     default_params = {"$format": "json"}
     if params:
@@ -84,7 +84,7 @@ def fetch_olinda(servico, versao, recurso, params=None):
     return resp.json()
 
 
-# ── Parsing e cálculos ──────────────────────────────────────────────────────
+# ── Parsing and calculations ──────────────────────────────────────────────────────
 
 def parse_month(d):
     """DD/MM/YYYY → YYYY-MM"""
@@ -97,7 +97,7 @@ def parse_date(d):
 
 
 def calc_variacao_yoy(series):
-    """Calcula variação % ano-a-ano para séries mensais."""
+    """Calculates year-on-year % change for monthly series."""
     by_month = {m["data"]: m["valor"] for m in series}
     result = []
     for m in sorted(series, key=lambda x: x["data"]):
@@ -110,14 +110,14 @@ def calc_variacao_yoy(series):
 
 
 def classificar_instituicao(nome):
-    """Classifica uma instituição pelo nome.
-    Retorna: 'grande', 'cooperativa' (só sistemas principais) ou 'outro'.
+    """Classifies an institution by name.
+    Returns: 'grande' (large), 'cooperativa' (main systems only) or 'outro' (other).
     """
     nome_upper = nome.upper().strip()
     for key, info in INSTITUICOES.items():
         if key in nome_upper or info["nome"].upper() in nome_upper:
             return info["segmento"]
-    # Cooperativas dos 4 sistemas principais
+    # Cooperatives from the 4 main systems
     if any(x in nome_upper for x in ["SICOOB", "SICOO", "BANCOOB",
                                        "SICREDI", "SICRED",
                                        "UNICRED", "UNICR",
@@ -128,11 +128,11 @@ def classificar_instituicao(nome):
 
 
 def limpar_nome_instituicao(nome):
-    """Retorna nome curto para agregação (sistemas de cooperativas → nome do sistema)."""
+    """Returns a short name for aggregation (cooperative systems → system name)."""
     nome = nome.strip()
     upper = nome.upper()
 
-    # Cooperativas — agregar por sistema
+    # Cooperatives: aggregate by system
     if "SICOOB" in upper or "BANCOOB" in upper:
         return "Sicoob"
     if "SICREDI" in upper or "SICRED" in upper:
@@ -144,7 +144,7 @@ def limpar_nome_instituicao(nome):
     if "AILOS" in upper:
         return "Ailos"
 
-    # Mapeamento de nomes conhecidos
+    # Mapping of known names
     MAPA = {
         "ITAU UNIBANCO": "Itaú Unibanco", "ITAÚ UNIBANCO": "Itaú Unibanco",
         "ITAU": "Itaú", "ITAÚ": "Itaú",
@@ -188,7 +188,7 @@ def limpar_nome_instituicao(nome):
         if key in upper:
             return val
 
-    # Remover prefixos genéricos
+    # Remove generic prefixes
     for prefix in ["BANCO ", "BCO ", "COOP ", "CIA "]:
         if upper.startswith(prefix):
             nome = nome[len(prefix):].strip()
@@ -204,11 +204,11 @@ def limpar_nome_instituicao(nome):
 
 
 def limpar_nome_singular(nome):
-    """Retorna nome legível para cooperativa singular."""
+    """Returns a readable name for an individual cooperative."""
     nome = nome.strip()
     upper = nome.upper()
 
-    # 0. Remover sufixos genéricos, depois "COOPERATIVA DE CRÉDITO" do final
+    # 0. Remove generic suffixes, then "COOPERATIVA DE CRÉDITO" from the end
     for suf in [" LTDA.", " LTDA", " S.A.", " S.A"]:
         if upper.endswith(suf.upper()):
             nome = nome[:len(nome)-len(suf)].strip()
@@ -220,23 +220,23 @@ def limpar_nome_singular(nome):
             upper = nome.upper()
             break
 
-    # 1. Tentar extrair nome após " - " (padrão: "COOP LONGA - NOME CURTO")
-    # Separadores possíveis: " - " ou "-" colado
+    # 1. Try to extract the name after " - " (pattern: "LONG COOP - SHORT NAME")
+    # Possible separators: " - " or an attached "-"
     sep = " - " if " - " in nome else ("-" if nome.count("-") == 1 else None)
     if sep and sep in nome:
         parts = [p.strip() for p in nome.split(sep) if len(p.strip()) > 3]
         if parts:
-            # Identificar parte com nome do sistema
+            # Identify the part with the system name
             sistemas = ["SICOOB","SICREDI","UNICRED","CRESOL"]
             with_sis = [p for p in parts if any(s in p.upper() for s in sistemas)]
             without = [p for p in parts if not any(s in p.upper() for s in sistemas)]
 
             if with_sis and len(with_sis) > 1:
-                # Múltiplas partes com sistema → pegar a mais curta
+                # Several parts with the system → take the shortest
                 best = min(with_sis, key=len)
             elif with_sis and without:
                 short_sis = min(with_sis, key=len)
-                # Se a parte com sistema é curta (<30), usar ela; senão prefixar a sem sistema
+                # If the part with the system is short (<30), use it; otherwise prefix the part without it
                 if len(short_sis) < 65:
                     best = short_sis
                 else:
@@ -256,7 +256,7 @@ def limpar_nome_singular(nome):
             for suf in [" LTDA.", " LTDA", " S.A.", "."]:
                 if best.upper().endswith(suf.upper()):
                     best = best[:len(best)-len(suf)].strip()
-            # Se o resultado ainda começa com "COOPERATIVA DE...", aplicar limpeza de prefixo
+            # If the result still starts with "COOPERATIVA DE...", apply prefix cleaning
             bu = best.upper()
             for pfx in ["COOPERATIVA DE CRÉDITO, POUPANÇA E INVESTIMENTO ","COOPERATIVA DE CREDITO, POUPANÇA E INVESTIMENTO ",
                          "COOPERATIVA DE CRÉDITO E INVESTIMENTO COM INTERAÇÃO SOLIDÁRIA ","COOPERATIVA DE CRÉDITO E ECONOMIA COM INTERAÇÃO SOLIDÁRIA ",
@@ -267,7 +267,7 @@ def limpar_nome_singular(nome):
                 if bu.startswith(pfx.upper()):
                     rest = best[len(pfx):].strip()
                     if rest:
-                        # Prefixar sistema se necessário
+                        # Prefix the system if needed
                         if not any(s in rest.upper() for s in sistemas):
                             for s in sistemas:
                                 if s in upper:
@@ -277,7 +277,7 @@ def limpar_nome_singular(nome):
                     break
             return best[:40]
 
-    # 2. Remover prefixos longos (do mais longo para o mais curto)
+    # 2. Remove long prefixes (longest to shortest)
     prefixos = [
         "COOPERATIVA DE CRÉDITO, POUPANÇA E INVESTIMENTO ",
         "COOPERATIVA DE CREDITO, POUPANÇA E INVESTIMENTO ",
@@ -310,7 +310,7 @@ def limpar_nome_singular(nome):
             if rest:
                 return rest[:40]
 
-    # 3. Para nomes que contêm o sistema, extrair nome do sistema + complemento
+    # 3. For names containing the system, extract system name + complement
     import re
     for sistema in ["UNICRED", "SICOOB", "SICREDI", "CRESOL"]:
         match = re.search(rf'({sistema}\s+\S+(?:\s+\S+)?)', upper)
@@ -325,10 +325,10 @@ def limpar_nome_singular(nome):
     return nome[:40]
 
 
-# ── Persistência ────────────────────────────────────────────────────────────
+# ── Persistence ────────────────────────────────────────────────────────────
 
 def save_json(data, filename):
-    """Salva dicionário como JSON em /data/."""
+    """Saves a dictionary as JSON in /data/."""
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     filepath = DATA_DIR / filename
     filepath.write_text(json.dumps(data, ensure_ascii=False, indent=2))
@@ -336,5 +336,5 @@ def save_json(data, filename):
 
 
 def now_iso():
-    """Timestamp ISO 8601 para last_updated."""
+    """ISO 8601 timestamp for last_updated."""
     return datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")

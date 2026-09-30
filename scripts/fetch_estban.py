@@ -1,7 +1,7 @@
-"""Gera dados geográficos (crédito e depósitos por UF) a partir do IF.data.
+"""Builds geographic data (credit and deposits by state) from IF.data.
 
-O ESTBAN do BCB não possui API pública estável, então utilizamos os dados
-do IF.data (cadastro + dados financeiros) para agregar por UF.
+The BCB ESTBAN has no stable public API, so we use IF.data
+(registry + financial data) to aggregate by state.
 """
 
 import requests
@@ -10,7 +10,7 @@ from utils import save_json, now_iso
 
 BASE = "https://www3.bcb.gov.br/ifdata/rest/arquivos"
 
-# Trimestres para série temporal
+# Quarters for the time series
 TRIMESTRES = [202212, 202312, 202412]
 
 # Campos financeiros (layout antigo, cadastro 1005)
@@ -28,7 +28,7 @@ def fetch_arquivo(nome):
 
 
 def extrair_por_uf(dt):
-    """Agrega dados financeiros por UF para um trimestre."""
+    """Aggregates financial data by state for one quarter."""
     prefix = f"ifdata/{dt}"
     cadastro = fetch_arquivo(f"{prefix}/cadastro{dt}_1005.json")
     dados = fetch_arquivo(f"{prefix}/dados{dt}_1.json")
@@ -75,9 +75,9 @@ def extrair_por_uf(dt):
 
 
 def main():
-    print("── Gerando dados geográficos por UF ──")
+    print("── Building geographic data by state ──")
 
-    # População estimada por UF (IBGE 2024, em milhares)
+    # Estimated population by state (IBGE 2024, in thousands)
     populacao = {
         "AC": 936, "AL": 3351, "AM": 4308, "AP": 901, "BA": 14985,
         "CE": 9274, "DF": 3094, "ES": 4109, "GO": 7206, "MA": 7154,
@@ -95,9 +95,9 @@ def main():
             print(f"    {len(por_uf)} UFs")
             trimestres_data[str(dt)] = por_uf
         except Exception as e:
-            print(f"    ERRO: {e}")
+            print(f"    ERROR: {e}")
 
-    # Último trimestre como referência principal
+    # Latest quarter as the main reference
     ultimo_dt = max(trimestres_data.keys())
     ultimo = trimestres_data[ultimo_dt]
 
@@ -128,7 +128,7 @@ def main():
     }
 
     save_json(resultado, "estban.json")
-    print("── Concluído ──")
+    print("── Done ──")
 
 
 if __name__ == "__main__":

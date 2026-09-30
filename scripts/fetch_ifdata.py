@@ -1,4 +1,4 @@
-"""Coleta demonstrações financeiras do IF.data/BCB (API REST interna)."""
+"""Collects financial statements from IF.data/BCB (internal REST API)."""
 
 import requests
 import json
@@ -13,7 +13,7 @@ TRIMESTRES = [
     202403, 202406, 202409, 202412,
 ]
 
-# Cooperativas que devem ser agregadas por sistema
+# Cooperatives that must be aggregated by system
 SISTEMAS_COOP = {"Sicoob", "Sicredi", "Unicred", "Cresol", "Ailos"}
 
 
@@ -24,12 +24,12 @@ def fetch_arquivo(nome_arquivo):
 
 
 def extrair_dados_trimestre(dt):
-    """Extrai dados financeiros de um trimestre."""
+    """Extracts financial data for one quarter."""
     prefix = f"ifdata/{dt}"
     cadastro_file = f"{prefix}/cadastro{dt}_1005.json"
     dados_file = f"{prefix}/dados{dt}_1.json"
 
-    print(f"    Cadastro + Dados...")
+    print(f"    Registry + data...")
     cadastro = fetch_arquivo(cadastro_file)
     c0_map = {int(c["c0"]): c for c in cadastro}
     dados = fetch_arquivo(dados_file)
@@ -80,7 +80,7 @@ def extrair_dados_trimestre(dt):
 
 
 def agregar_por_sistema(resultados):
-    """Agrupa instituições por nome limpo. Cooperativas singulares são somadas por sistema."""
+    """Groups institutions by clean name. Individual cooperatives are summed by system."""
     grupos = defaultdict(list)
     for inst in resultados:
         grupos[inst["nome"]].append(inst)
@@ -90,7 +90,7 @@ def agregar_por_sistema(resultados):
 
     for nome, insts in grupos.items():
         if len(insts) == 1:
-            # Instituição única — manter como está
+            # Single institution: keep as is
             i = insts[0]
             agregado.append({
                 "nome": nome,
@@ -106,14 +106,14 @@ def agregar_por_sistema(resultados):
                 "qtd_singulares": 1,
             })
         else:
-            # Múltiplas entradas — agregar (soma financeira, recalcular indicadores)
+            # Multiple entries: aggregate (financial sum, recalculate indicators)
             ativo = sum(i["ativo_total"] for i in insts)
             pl = sum(i["patrimonio_liquido"] for i in insts)
             lucro = sum(i["lucro_liquido"] for i in insts)
             credito = sum(i["carteira_credito"] for i in insts)
             captacao = sum(i["captacoes"] for i in insts)
 
-            # Basileia: média ponderada por ativo
+            # Basel ratio: asset-weighted average
             bas_vals = [(i["indice_basileia"], i["ativo_total"]) for i in insts if i["indice_basileia"] is not None]
             basileia = None
             if bas_vals:
@@ -138,7 +138,7 @@ def agregar_por_sistema(resultados):
                 "qtd_singulares": len(insts),
             })
 
-            # Guardar singulares para drill-down (só cooperativas principais)
+            # Keep individual co-ops for drill-down (main cooperatives only)
             if nome in SISTEMAS_COOP:
                 singulares[nome] = sorted(
                     [{
@@ -151,7 +151,7 @@ def agregar_por_sistema(resultados):
                     } for i in insts],
                     key=lambda x: x["ativo_total"],
                     reverse=True,
-                )[:50]  # Top 50 singulares por sistema
+                )[:50]  # Top 50 individual co-ops per system
 
     return agregado, singulares
 
@@ -176,7 +176,7 @@ def calcular_concentracao(agregado, campo="ativo_total"):
 
 
 def main():
-    print("── Coletando dados do IF.data ──")
+    print("── Collecting IF.data data ──")
 
     all_raw = {}
     for dt in TRIMESTRES:
@@ -185,27 +185,27 @@ def main():
             resultados = extrair_dados_trimestre(dt)
             if resultados:
                 all_raw[str(dt)] = resultados
-            print(f"    {len(resultados)} instituições brutas")
+            print(f"    {len(resultados)} raw institutions")
         except Exception as e:
-            print(f"    ERRO: {e}")
+            print(f"    ERROR: {e}")
 
     if not all_raw:
-        print("  ERRO: Nenhum trimestre coletado")
+        print("  ERROR: No quarter collected")
         return
 
-    # ── Agregar por sistema ──
+    # ── Aggregate by system ──
     all_agregado = {}
     all_singulares = {}
     for dt, raw in all_raw.items():
         agregado, singulares = agregar_por_sistema(raw)
         all_agregado[dt] = agregado
         all_singulares[dt] = singulares
-        print(f"  → {dt}: {len(raw)} → {len(agregado)} após agregação")
+        print(f"  → {dt}: {len(raw)} → {len(agregado)} after aggregation")
 
     ultimo_dt = max(all_agregado.keys())
     ultimo = all_agregado[ultimo_dt]
 
-    # 1. Instituições (tabela-mestre)
+    # 1. Institutions (master table)
     instituicoes_master = []
     seen = set()
     for inst in sorted(ultimo, key=lambda x: x["ativo_total"], reverse=True):
@@ -241,7 +241,7 @@ def main():
         "trimestres": resultados_por_tri,
     }, "resultados.json")
 
-    # 3. Indicadores (com singulares para drill-down)
+    # 3. Indicators (with individual co-ops for drill-down)
     indicadores_por_tri = {}
     for dt, insts in all_agregado.items():
         indicadores_por_tri[dt] = {
@@ -260,7 +260,7 @@ def main():
         "trimestres": indicadores_por_tri,
     }, "indicadores.json")
 
-    # 4. Concentração
+    # 4. Concentration
     concentracao_por_tri = {}
     for dt, insts in all_agregado.items():
         shares_ativo, hhi_ativo = calcular_concentracao(insts, "ativo_total")
@@ -289,7 +289,7 @@ def main():
         "trimestres": concentracao_por_tri,
     }, "concentracao.json")
 
-    print("── Concluído ──")
+    print("── Done ──")
 
 
 if __name__ == "__main__":

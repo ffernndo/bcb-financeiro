@@ -5,7 +5,7 @@
   "modalidades": {
     "consignado_inss": {
       "codigo": "218101",
-      "descricao": "Consignado INSS",
+      "descricao": "Payroll loan (INSS pensioners)",
       "total_instituicoes": 685,
       "media_geral": 23.41,
       "media_por_segmento": {
@@ -258,7 +258,7 @@
     },
     "consignado_publico": {
       "codigo": "220101",
-      "descricao": "Consignado Público",
+      "descricao": "Payroll loan (public sector)",
       "total_instituicoes": 824,
       "media_geral": 28.91,
       "media_por_segmento": {
@@ -511,7 +511,7 @@
     },
     "consignado_privado": {
       "codigo": "219101",
-      "descricao": "Consignado Privado",
+      "descricao": "Payroll loan (private sector)",
       "total_instituicoes": 935,
       "media_geral": 54.54,
       "media_por_segmento": {
@@ -764,7 +764,7 @@
     },
     "credito_pessoal": {
       "codigo": "221101",
-      "descricao": "Crédito Pessoal",
+      "descricao": "Personal loan",
       "total_instituicoes": 1479,
       "media_geral": 171.64,
       "media_por_segmento": {
@@ -1017,7 +1017,7 @@
     },
     "veiculos": {
       "codigo": "401101",
-      "descricao": "Aquisição de Veículos",
+      "descricao": "Vehicle finance",
       "total_instituicoes": 769,
       "media_geral": 25.74,
       "media_por_segmento": {
@@ -1269,7 +1269,7 @@
     },
     "cheque_especial": {
       "codigo": "216101",
-      "descricao": "Cheque Especial",
+      "descricao": "Overdraft",
       "total_instituicoes": 1155,
       "media_geral": 188.63,
       "media_por_segmento": {
@@ -1522,7 +1522,7 @@
     },
     "cartao_rotativo": {
       "codigo": "204101",
-      "descricao": "Cartão Rotativo",
+      "descricao": "Credit card (revolving)",
       "total_instituicoes": 1185,
       "media_geral": 482.61,
       "media_por_segmento": {
@@ -1775,7 +1775,7 @@
     },
     "cartao_parcelado": {
       "codigo": "215101",
-      "descricao": "Cartão Parcelado",
+      "descricao": "Credit card (instalments)",
       "total_instituicoes": 1172,
       "media_geral": 200.09,
       "media_por_segmento": {
@@ -2028,7 +2028,7 @@
     },
     "capital_giro_curto": {
       "codigo": "210101",
-      "descricao": "Capital de Giro ≤365d",
+      "descricao": "Working capital ≤365d",
       "total_instituicoes": 903,
       "media_geral": 64.58,
       "media_por_segmento": {
@@ -2281,7 +2281,7 @@
     },
     "capital_giro_longo": {
       "codigo": "211101",
-      "descricao": "Capital de Giro >365d",
+      "descricao": "Working capital >365d",
       "total_instituicoes": 969,
       "media_geral": 37.76,
       "media_por_segmento": {
